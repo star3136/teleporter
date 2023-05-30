@@ -151,8 +151,14 @@ pub fn run(mut opt: SendOpt) -> Result<(), TeleportError> {
     let mut sent = 0;
     let mut skip = 0;
 
+    if opt.username.is_empty() {
+        println!(" => No username specified");
+        return Ok(());
+    }
     // Generate a list of replacement names and fix up the input list
     let rep = find_replacements(&mut opt);
+    println!("input: {:?}", &opt.input);
+    println!("rep: {:?}", &rep.new);
 
     // Generate the file list
     let files = get_file_list(&opt);
@@ -235,6 +241,8 @@ pub fn run(mut opt: SendOpt) -> Result<(), TeleportError> {
         header.chmod = meta.permissions().mode();
         header.filesize = meta.len();
         header.filename = filename.as_bytes().to_vec();
+        header.username = opt.username.as_bytes().to_vec();
+        
 
         // Connect to server
         let addr = match format!("{}:{}", opt.dest, opt.port).to_socket_addrs() {
@@ -268,6 +276,10 @@ pub fn run(mut opt: SendOpt) -> Result<(), TeleportError> {
         let packet = utils::recv_packet(&mut stream, &enc)?;
         let mut recv = TeleportInitAck::new(TeleportStatus::Proceed);
         recv.deserialize(&packet.data)?;
+        if let Some(ref x) = recv.delta {
+            println!("[recv][delta] filesize: {}, hash: {}, chunk_size: {}, chunk_hash: {:?}", x.filesize, x.hash, x.chunk_size, x.chunk_hash);
+        }
+        
 
         if num == 0 {
             println!("Server {}", recv.version);

@@ -97,7 +97,7 @@ pub fn send_packet(
     // Send the packet
     sock.write_all(&message)?;
     sock.flush()?;
-
+    println!("[send] package: {:?}", message);
     Ok(())
 }
 
@@ -113,6 +113,7 @@ pub fn recv_packet(
         }
     }
 
+
     let mut init: &[u8] = &initbuf;
     let protocol = init.read_u64::<LittleEndian>()?;
     if protocol != PROTOCOL {
@@ -121,6 +122,10 @@ pub fn recv_packet(
 
     let packet_len = init.read_u32::<LittleEndian>()?;
     let action = init.read_u8()?;
+
+    println!("protocol: {:X}", protocol);
+    println!("package_len: {}", packet_len);
+    println!("action: {}", action);
 
     // Include IV size in length
     let mut total_len = 13 + packet_len as usize;

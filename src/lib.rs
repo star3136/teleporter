@@ -54,6 +54,9 @@ pub struct SendOpt {
     /// If the destination file exists, append a ".1" (or next available number) to the filename instead of overwriting
     #[arg(short, long)]
     filename_append: bool,
+
+    #[arg(short, long)]
+    username: String,
 }
 
 #[derive(Clone, Debug, Parser, PartialEq, Eq)]

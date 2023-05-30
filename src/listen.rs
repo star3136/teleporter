@@ -53,6 +53,7 @@ pub fn run(opt: ListenOpt) -> Result<(), TeleportError> {
             Ok(s) => s,
             _ => continue,
         };
+
         // Receive connections in recv function
         let recv_list_clone = Arc::clone(&recv_list);
         thread::spawn(move || {
@@ -142,6 +143,8 @@ fn handle_connection(
         return send_ack(resp, &mut stream, &enc);
     }
 
+    let username = String::from_utf8(header.username)?;
+    println!("username: {}", &username);
     let mut filename: String = String::from_utf8(header.filename)?;
     let features: u32 = header.features;
 

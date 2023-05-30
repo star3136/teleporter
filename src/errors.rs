@@ -51,4 +51,9 @@ pub enum TeleportError {
 
     #[error("Encryption failed")]
     EncryptionFailure,
+
+    // added by lee
+    #[error("Invalid user name")]
+    InvalidUserName,
+    // added end
 }

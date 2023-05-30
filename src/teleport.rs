@@ -235,6 +235,10 @@ pub struct TeleportInit {
     pub filesize: u64,
     pub filename_len: u16,
     pub filename: Vec<u8>,
+    // added by lee
+    pub username_len: u16,
+    pub username: Vec<u8>,
+    // added end
 }
 
 impl TeleportInit {
@@ -252,6 +256,10 @@ impl TeleportInit {
             filesize: 0,
             filename_len: 0,
             filename: Vec::<u8>::new(),
+            // added by lee
+            username_len: 0,
+            username: Vec::<u8>::new(),
+            //added end
         }
     }
 
@@ -276,6 +284,17 @@ impl TeleportInit {
 
         // Add filename
         out.append(&mut self.filename.to_vec());
+
+        // added by lee
+        println!("username: {:?}", self.username);
+        
+        let ulen = u16::try_from(self.username.len())?;
+        out.append(&mut ulen.to_le_bytes().to_vec());
+        println!("username_len: {}", ulen);
+
+        out.append(&mut self.username.to_vec());
+
+        // added end
 
         Ok(out)
     }
@@ -305,6 +324,21 @@ impl TeleportInit {
             return Err(TeleportError::InvalidFileName);
         }
 
+        let s = String::from_utf8(fname.clone()).unwrap();
+        println!("fname: {}", s);
+        
+        // added by lee
+        buf = &buf[self.filename_len as usize..];
+        self.username_len = buf.read_u16::<LittleEndian>()?;
+        println!("username len: {}", self.username_len);
+        // Extract filename
+        let uname = &buf[..self.username_len as usize].to_vec();
+        self.username = uname.to_vec();
+        if self.username.len() != self.username_len as usize {
+            return Err(TeleportError::InvalidUserName);
+        }
+
+        // added end
         Ok(())
     }
 }
@@ -329,6 +363,7 @@ pub enum TeleportStatus {
     EncryptionError = 0x06,
     BadFileName = 0x07,
     Pong = 0x08,
+    UnknownUser = 0x09,
     UnknownAction = 0xff,
 }
 
